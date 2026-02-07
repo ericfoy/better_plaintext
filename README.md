@@ -10,4 +10,9 @@ After enabling this module, you will see three formatting options when "Plain te
 
 <img width="1047" height="198" alt="image" src="https://github.com/user-attachments/assets/45f3c7b6-0b00-4232-8650-023cf4a54b3c" />
 
+
 You will also find these options for overriding the display for any given display, as well as for Views:
+
+<img width="907" height="381" alt="image" src="https://github.com/user-attachments/assets/4fc9d18f-2a1d-415c-b45d-0e264f42700f" />
+
+<img width="705" height="424" alt="image" src="https://github.com/user-attachments/assets/62b1fa1d-1004-41e0-b489-d8f054d30e79" />
