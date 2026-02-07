@@ -1,0 +1,7 @@
+name = Better Plain Text
+description = Adds line-break and whitespace display options for plain text text fields.
+package = Custom
+type = module
+backdrop = 1.x
+dependencies[] = text
+dependencies[] = field_ui
