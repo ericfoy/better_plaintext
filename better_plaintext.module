@@ -16,10 +16,10 @@ function better_plaintext_whitespace_options($include_inherit = FALSE) {
     $options[''] = t('- Use field setting -');
   }
 
+  $options['none']     = t('Do not display line breaks (all text on one line (Stock Backdrop behavior)).');
   $options['pre_wrap'] = t('Preserve line breaks; wrap long lines to fit container.');
   $options['pre_line'] = t('Preserve line breaks; wrap long lines; Compress extra whitespace.');
   $options['pre_pre']  = t('Display as "preformatted text" (useful for code snippets, etc.).');
-  $options['none']     = t('Do not display line breaks (all text on one line (Stock Backdrop behavior)).');
 
   return $options;
 }
@@ -64,7 +64,7 @@ function better_plaintext_form_field_ui_field_edit_form_alter(&$form, &$form_sta
     '#description' => t('Controls how line breaks and whitespace are handled when this field is displayed as plain text.
                          This setting may be overridden in the field and views display formatters. 
                          NOTE: These are NOT html filter settings; these only control how whitespace and line breaks are displayed. 
-                         No html markup is allowed here.'),
+                         Any markup you entered into this field will be displayed literally, having no effect on the display format.'),
     '#states' => array(
       'visible' => array(
         // Match core’s selector style.
@@ -82,35 +82,32 @@ function better_plaintext_form_field_ui_field_edit_form_alter(&$form, &$form_sta
  * Adds display-mode override under Manage display → Configure.
  */
 function better_plaintext_field_formatter_settings_form_alter(&$settings_form, $context) {
-  if (empty($context['field']['type']) || empty($context['instance']['settings'])) {
+  // Only plain-text text fields.
+  if (empty($context['field']['type']) || empty($context['instance']['settings'])) return;
+  if (!in_array($context['field']['type'], array('text', 'text_long', 'text_with_summary'), TRUE)) return;
+  if ((int) ($context['instance']['settings']['text_processing'] ?? 0) !== 0) return;
+
+  $view_mode = $context['view_mode'] ?? 'default';
+  $display = $context['instance']['display'][$view_mode] ?? array();
+
+  // Formatter machine name is stored here (Backdrop API note).
+  $formatter_type = $display['type'] ?? '';
+  if ($formatter_type && !in_array($formatter_type, array('text_default', 'text_plain'), TRUE)) {
     return;
   }
 
-  // Only for core text field types.
-  if (!in_array($context['field']['type'], array('text', 'text_long', 'text_with_summary'), TRUE)) {
-    return;
+  // IMPORTANT: For Views, the saved setting is here:
+  $current = '';
+  if (isset($display['settings']['better_plaintext_whitespace'])) {
+    $current = $display['settings']['better_plaintext_whitespace'];
   }
-
-  // Only when the field is configured as plain text.
-  if (!isset($context['instance']['settings']['text_processing']) || (int) $context['instance']['settings']['text_processing'] !== 0) {
-    return;
-  }
-
-  // Optionally limit to the common text formatters.
-  if (!empty($context['formatter']['type']) && !in_array($context['formatter']['type'], array('text_default', 'text_plain'), TRUE)) {
-    return;
-  }
-
-  $current = isset($context['settings']['better_plaintext_whitespace'])
-    ? $context['settings']['better_plaintext_whitespace']
-    : '';
 
   $settings_form['better_plaintext_whitespace'] = array(
     '#type' => 'select',
     '#title' => t('Plain text whitespace'),
     '#options' => better_plaintext_whitespace_options(TRUE),
     '#default_value' => $current,
-    '#description' => t('Override the field-level “Plain text display” setting for this display mode.'),
+    '#description' => t('Override the field-level “Plain text display” setting for this formatter.'),
     '#weight' => 50,
   );
 }
@@ -121,37 +118,29 @@ function better_plaintext_field_formatter_settings_form_alter(&$settings_form, $
  * Ensures a visible summary so "Configure" is available, and shows the chosen mode.
  */
 function better_plaintext_field_formatter_settings_summary_alter(&$summary, $context) {
-  if (empty($context['field']['type']) || empty($context['instance']['settings'])) {
+  // Only plain-text text fields.
+  if (empty($context['field']['type']) || empty($context['instance']['settings'])) return;
+  if (!in_array($context['field']['type'], array('text', 'text_long', 'text_with_summary'), TRUE)) return;
+  if ((int) ($context['instance']['settings']['text_processing'] ?? 0) !== 0) return;
+
+  $view_mode = $context['view_mode'] ?? 'default';
+  $display = $context['instance']['display'][$view_mode] ?? array();
+
+  $formatter_type = $display['type'] ?? '';
+  if ($formatter_type && !in_array($formatter_type, array('text_default', 'text_plain'), TRUE)) {
     return;
   }
 
-  if (!in_array($context['field']['type'], array('text', 'text_long', 'text_with_summary'), TRUE)) {
-    return;
+  $val = '';
+  if (isset($display['settings']['better_plaintext_whitespace'])) {
+    $val = $display['settings']['better_plaintext_whitespace'];
   }
-
-  if (!isset($context['instance']['settings']['text_processing']) || (int) $context['instance']['settings']['text_processing'] !== 0) {
-    return;
-  }
-
-  if (!empty($context['formatter']['type']) && !in_array($context['formatter']['type'], array('text_default', 'text_plain'), TRUE)) {
-    return;
-  }
-
-  $val = isset($context['settings']['better_plaintext_whitespace'])
-    ? $context['settings']['better_plaintext_whitespace']
-    : '';
 
   $labels = better_plaintext_whitespace_options(TRUE);
   $label = isset($labels[$val]) ? $labels[$val] : t('- Use field setting -');
 
   $line = t('Whitespace: @mode', array('@mode' => $label));
-
-  if (trim($summary) === '') {
-    $summary = $line;
-  }
-  else {
-    $summary .= '<br />' . $line;
-  }
+  $summary = (trim($summary) === '') ? $line : ($summary . '<br />' . $line);
 }
 
 /**
@@ -254,5 +243,15 @@ function better_plaintext_field_attach_view_alter(&$output, $context) {
     }
 
     _better_plaintext_wrap_field_items($element, $ws);
+  }
+}
+
+function better_plaintext_field_formatter_info_alter(&$info) {
+  foreach (array('text_default', 'text_plain') as $formatter) {
+    if (!empty($info[$formatter]['settings']) && is_array($info[$formatter]['settings'])) {
+      if (!array_key_exists('better_plaintext_whitespace', $info[$formatter]['settings'])) {
+        $info[$formatter]['settings']['better_plaintext_whitespace'] = '';
+      }
+    }
   }
 }
