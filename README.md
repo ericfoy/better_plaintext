@@ -9,7 +9,7 @@ Also see this discussion: https://github.com/backdrop/backdrop-issues/issues/551
 
 ## Usage
 
-After enabling this module, you will see three formatting options when "Plain text" processing is selected:
+### After enabling this module, you will see three formatting options when "Plain text" processing is selected:
 
 <img width="1047" height="198" alt="image" src="https://github.com/user-attachments/assets/45f3c7b6-0b00-4232-8650-023cf4a54b3c" />
 
@@ -23,6 +23,10 @@ After enabling this module, you will see three formatting options when "Plain te
 ### ...as well as for Views:
 
 <img width="705" height="424" alt="image" src="https://github.com/user-attachments/assets/62b1fa1d-1004-41e0-b489-d8f054d30e79" />
+
+### Note that no html is introduced into the stored plaintext string in order to get these results.
+It works by embedding the string in a `<span style="white-space: pre-wrap;>field_text_here</span>`
+(or "white-space: pre-line") prior to output. The browser then honors the linebreaks ("\n" characters) as linefeeds.
 
 ## Enjoy.
 
