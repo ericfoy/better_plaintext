@@ -18,7 +18,7 @@ function better_plaintext_whitespace_options($include_inherit = FALSE) {
 
   $options['pre_wrap'] = t('Preserve line breaks; wrap long lines to fit container.');
   $options['pre_line'] = t('Preserve line breaks; wrap long lines; Compress extra whitespace.');
-  $options['none']     = t('Do not display line breaks (all text on one line).');
+  $options['none']     = t('Do not display line breaks (all text on one line (Stock Backdrop behavior)).');
 
   return $options;
 }
@@ -61,7 +61,9 @@ function better_plaintext_form_field_ui_field_edit_form_alter(&$form, &$form_sta
     '#options' => better_plaintext_whitespace_options(FALSE),
     '#default_value' => $default,
     '#description' => t('Controls how line breaks and whitespace are handled when this field is displayed as plain text.
-                         This setting may be overridden in the field and views display formatters.'),
+                         This setting may be overridden in the field and views display formatters. 
+                         NOTE: These are NOT html filter settings; these only control how whitespace and line breaks are displayed. 
+                         No html markup is allowed here.'),
     '#states' => array(
       'visible' => array(
         // Match core’s selector style.
