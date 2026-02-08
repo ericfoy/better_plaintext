@@ -18,6 +18,7 @@ function better_plaintext_whitespace_options($include_inherit = FALSE) {
 
   $options['pre_wrap'] = t('Preserve line breaks; wrap long lines to fit container.');
   $options['pre_line'] = t('Preserve line breaks; wrap long lines; Compress extra whitespace.');
+  $options['pre_pre']  = t('Display as "preformatted text" (useful for code snippets, etc.).');
   $options['none']     = t('Do not display line breaks (all text on one line (Stock Backdrop behavior)).');
 
   return $options;
@@ -157,16 +158,22 @@ function better_plaintext_field_formatter_settings_summary_alter(&$summary, $con
  * Helper: wrap each rendered field item with the chosen whitespace span.
  */
 function _better_plaintext_wrap_field_items(&$element, $ws) {
-  if ($ws !== 'pre_wrap' && $ws !== 'pre_line') {
+  if (!in_array($ws, array('pre_wrap', 'pre_line', 'pre_pre'), TRUE)) {
     return;
   }
   if (!empty($element['#better_plaintext_wrapped'])) {
     return;
   }
 
-  $style = ($ws === 'pre_wrap') ? 'white-space: pre-wrap;' : 'white-space: pre-line;';
-  $open  = '<span class="better-plain-text better-plain-text--' . check_plain($ws) . '" style="' . $style . '">';
-  $close = '</span>';
+  if ($ws === 'pre_pre') {
+    $open  = '<pre class="better-plain-text better-plain-text--pre_pre">';
+    $close = '</pre>';
+  }
+  else {
+    $style = ($ws === 'pre_wrap') ? 'white-space: pre-wrap;' : 'white-space: pre-line;';
+    $open  = '<span class="better-plain-text better-plain-text--' . check_plain($ws) . '" style="' . $style . '">';
+    $close = '</span>';
+  }
 
   foreach (element_children($element) as $delta) {
     if (!is_numeric($delta) || !is_array($element[$delta])) {
