@@ -9,10 +9,9 @@ Also see this discussion: https://github.com/backdrop/backdrop-issues/issues/551
 
 ## Usage
 
-### After enabling this module, you will see three formatting options when "Plain text" processing is selected:
+### After enabling this module, you will see four formatting options when "Plain text" processing is selected:
 
-<img width="1047" height="198" alt="image" src="https://github.com/user-attachments/assets/45f3c7b6-0b00-4232-8650-023cf4a54b3c" />
-
+<img width="817" height="251" alt="image" src="https://github.com/user-attachments/assets/ff5d5844-a5bc-4fcc-9bbd-005fc77c9396" />
 
 
 ### You will also find these options for overriding the display for any given display:
